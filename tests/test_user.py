@@ -1,3 +1,28 @@
+from fastapi.testclient import TestClient
+from src.main import app
+
+client = TestClient(app)
+
+# Существующие пользователи
+users = [
+    {
+        'id': 1,
+        'name': 'Ivan Ivanov',
+        'email': 'i.i.ivanov@mail.com',
+    },
+    {
+        'id': 2,
+        'name': 'Petr Petrov',
+        'email': 'p.p.petrov@mail.com',
+    }
+]
+
+def test_get_existed_user():
+    '''Получение существующего пользователя'''
+    response = client.get("/api/v1/user", params={'email': users[0]['email']})
+    assert response.status_code == 200
+    assert response.json() == users[0]
+
 def test_get_unexisted_user():
     '''Получение несуществующего пользователя'''
     response = client.get("/api/v1/user", params={'email': 'nonexistent@mail.com'})
@@ -29,7 +54,6 @@ def test_create_user_with_invalid_email():
 
 def test_delete_user():
     '''Удаление пользователя'''
-    # Сначала создаем нового пользователя
     user_to_delete = {
         'name': 'To Delete',
         'email': 'delete.me@mail.com'
@@ -37,11 +61,9 @@ def test_delete_user():
     create_response = client.post("/api/v1/user", json=user_to_delete)
     user_id = create_response.json()['id']
 
-    # Удаляем его
     delete_response = client.delete(f"/api/v1/user/{user_id}")
     assert delete_response.status_code == 200
     assert delete_response.json() == {'detail': 'User deleted'}
 
-    # Проверяем, что пользователь удален
     get_response = client.get("/api/v1/user", params={'email': user_to_delete['email']})
     assert get_response.status_code == 404
