@@ -67,3 +67,4 @@ def test_delete_user():
 
     get_response = client.get("/api/v1/user", params={'email': user_to_delete['email']})
     assert get_response.status_code == 404
+    #122
